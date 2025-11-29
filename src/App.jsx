@@ -1,12 +1,14 @@
 import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import Success from './Success';
 import './index.css'
 
-function App() {
+function Home() {
   const [word, setWord] = useState('')
   const [feeling, setFeeling] = useState('')
   const [loading, setLoading] = useState(false)
-  const [image, setImage] = useState(null)
   const [error, setError] = useState('')
+  const navigate = useNavigate();
 
   const handleWordChange = (e) => {
     const val = e.target.value
@@ -32,35 +34,32 @@ function App() {
 
     setLoading(true)
     setError('')
-    setImage(null)
 
     try {
-      // Call backend API
-      const response = await fetch('/api/generate', {
+      // 1. Create Checkout
+      const response = await fetch('/api/checkout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ word, feeling })
       })
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to generate image')
+        throw new Error(errorData.error || 'Failed to create checkout')
       }
 
       const data = await response.json()
 
-      if (data.image) {
-        setImage(data.image)
+      if (data.checkoutUrl) {
+        // 2. Redirect to MoneyDevKit
+        window.location.href = data.checkoutUrl;
       } else {
-        throw new Error('No image data received from server')
+        throw new Error('No checkout URL received')
       }
 
     } catch (err) {
       setError(err.message)
       console.error(err)
-    } finally {
       setLoading(false)
     }
   }
@@ -96,16 +95,21 @@ function App() {
           className="make-button"
           disabled={loading || !word || !feeling}
         >
-          {loading ? 'GENERATING...' : 'MAKE'}
+          {loading ? 'PREPARING CHECKOUT...' : 'MAKE'}
         </button>
-
-        {image && (
-          <div className="result-container">
-            <img src={image} alt={`${word} with ${feeling} feeling`} className="generated-image" />
-          </div>
-        )}
       </div>
     </div>
+  )
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/success" element={<Success />} />
+      </Routes>
+    </Router>
   )
 }
 

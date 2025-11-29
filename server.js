@@ -17,8 +17,71 @@ if (!apiKey) {
     console.error("ERROR: VITE_GEMINI_API_KEY is not set in .env file.");
 }
 
+import { createCheckout, getCheckout } from '@moneydevkit/nextjs/server';
+
 const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "nano-banana-pro-preview" });
+
+app.post('/api/checkout', async (req, res) => {
+    try {
+        const { word, feeling } = req.body;
+        if (!word || !feeling) {
+            return res.status(400).json({ error: 'Word and feeling are required' });
+        }
+
+        const protocol = req.protocol;
+        const host = req.get('host');
+        const baseUrl = `${protocol}://${host}`;
+        const successUrl = `${baseUrl}/success?word=${encodeURIComponent(word)}&feeling=${encodeURIComponent(feeling)}&checkoutId={CHECKOUT_ID}`;
+
+        console.log('Creating checkout with success URL:', successUrl);
+
+        const checkout = await createCheckout({
+            amount: 100,
+            currency: 'USD',
+            title: 'Nanobanana Image Generation',
+            description: `Generating: ${word} (${feeling})`,
+            successUrl: successUrl,
+            metadata: { word, feeling }
+        });
+
+        if (checkout && checkout.url) {
+            res.json({ checkoutUrl: checkout.url });
+        } else {
+            res.status(500).json({ error: 'Failed to create checkout URL' });
+        }
+    } catch (error) {
+        console.error('Error creating checkout:', error);
+        res.status(500).json({ error: error.message || 'Failed to create checkout' });
+    }
+});
+
+app.get('/api/payment-status/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const checkout = await getCheckout(id);
+
+        if (checkout && checkout.status === 'PAID') { // Check correct status enum from SDK/Docs
+            res.json({ paid: true, checkout });
+        } else {
+            res.json({ paid: false, status: checkout?.status });
+        }
+    } catch (error) {
+        console.error('Error checking payment status:', error);
+        res.status(500).json({ error: 'Failed to check status' });
+    }
+});
+
+app.post('/api/webhook', async (req, res) => {
+    try {
+        console.log('Webhook received:', req.body);
+        // In a real app, verify signature here using process.env.MDK_WEBHOOK_SECRET
+        res.status(200).json({ received: true });
+    } catch (error) {
+        console.error('Webhook error:', error);
+        res.status(500).json({ error: 'Webhook failed' });
+    }
+});
 
 app.post('/api/generate', async (req, res) => {
     try {
