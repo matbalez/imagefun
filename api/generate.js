@@ -23,7 +23,7 @@ __export(generate_exports, {
 });
 module.exports = __toCommonJS(generate_exports);
 var import_generative_ai = require("@google/generative-ai");
-var apiKey = process.env.VITE_GEMINI_API_KEY;
+var apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) {
   console.error("ERROR: VITE_GEMINI_API_KEY is not set in .env file.");
 }

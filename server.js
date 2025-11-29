@@ -11,7 +11,7 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
-const apiKey = process.env.VITE_GEMINI_API_KEY;
+const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
     console.error("ERROR: VITE_GEMINI_API_KEY is not set in .env file.");
