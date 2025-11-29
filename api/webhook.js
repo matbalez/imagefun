@@ -24032,7 +24032,10 @@ async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
   try {
-    console.log("Webhook received. Body:", JSON.stringify(req.body, null, 2));
+    console.log("Webhook HIT!");
+    console.log("Headers:", JSON.stringify(req.headers, null, 2));
+    console.log("Body Type:", typeof req.body);
+    console.log("Body:", JSON.stringify(req.body, null, 2));
     const { payment_hash, amount_msat, amount } = req.body || {};
     const paymentHash = payment_hash || req.body?.paymentHash;
     const amountVal = amount_msat || amount || req.body?.amountMsat;
