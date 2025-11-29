@@ -13,7 +13,7 @@ functions.forEach(file => {
         outfile: `api/${file}`,
         format: 'cjs',
         footer: { js: 'if (module.exports.default) module.exports = module.exports.default;' },
-        external: ['@google/generative-ai'], // Keep this external if it works, or bundle it too to be safe. 
+        external: ['@google/generative-ai', '@moneydevkit/lightning-js'],
         // We MUST bundle @moneydevkit/nextjs because it's broken in Node ESM
     }).catch(() => process.exit(1));
 });

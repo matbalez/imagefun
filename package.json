@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@moneydevkit/lightning-js": "^0.1.52",
     "@moneydevkit/nextjs": "^0.1.19",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
