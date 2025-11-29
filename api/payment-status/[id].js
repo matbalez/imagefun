@@ -24275,6 +24275,40 @@ var MoneyDevKitNode2 = class {
 
 // api-src/sdk/mdk-client.js
 ensureUndiciDispatcher2();
+var MoneyDevKitClient2 = class {
+  client;
+  constructor(options) {
+    const link = new RPCLink({
+      url: options.baseUrl,
+      headers: () => ({
+        "x-api-key": options.accessToken
+      })
+    });
+    this.client = createORPCClient(link);
+  }
+  get checkouts() {
+    return {
+      get: async (params) => {
+        return await this.client.checkout.get(params);
+      },
+      create: async (fields, nodeId) => {
+        return await this.client.checkout.create({
+          ...fields,
+          nodeId
+        });
+      },
+      confirm: async (params) => {
+        return await this.client.checkout.confirm(params);
+      },
+      registerInvoice: async (params) => {
+        return await this.client.checkout.registerInvoice(params);
+      },
+      paymentReceived: async (params) => {
+        return await this.client.checkout.paymentReceived(params);
+      }
+    };
+  }
+};
 
 // api-src/sdk/mdk.js
 function readEnv2() {
@@ -24327,6 +24361,13 @@ function resolveMoneyDevKitOptions2() {
     nodeOptions: mergedNodeOptions
   };
 }
+function createMoneyDevKitClient2() {
+  const resolved = resolveMoneyDevKitOptions2();
+  return new MoneyDevKitClient2({
+    accessToken: resolved.accessToken,
+    baseUrl: resolved.baseUrl ?? MAINNET_MDK_BASE_URL2
+  });
+}
 function createMoneyDevKitNode2() {
   const resolved = resolveMoneyDevKitOptions2();
   return new MoneyDevKitNode2({
@@ -24358,10 +24399,27 @@ async function handler(req, res) {
     console.log("Syncing node...");
     try {
       const node = createMoneyDevKitNode2();
-      await node.receivePayments();
-      console.log("Node sync complete");
+      const events = await node.receivePayments();
+      console.log("Node sync complete. Events:", JSON.stringify(events, null, 2));
+      if (Array.isArray(events)) {
+        for (const event of events) {
+          const paymentHash = event.payment_hash || event.paymentHash;
+          const amountMsat = event.amount_msat || event.amountMsat;
+          if (paymentHash && amountMsat) {
+            console.log(`Found payment: ${paymentHash}, ${amountMsat} msats`);
+            const client = createMoneyDevKitClient2();
+            await client.checkouts.paymentReceived({
+              payments: [{
+                paymentHash,
+                amountSats: Math.floor(parseInt(amountMsat) / 1e3)
+              }]
+            });
+            console.log("Marked payment as received in API");
+          }
+        }
+      }
     } catch (syncError) {
-      console.error("Node sync failed:", syncError);
+      console.error("Node sync/processing failed:", syncError);
     }
     const checkout = await getCheckout2(id);
     console.log(`Status for ${id}:`, checkout ? checkout.status : "Not found");

@@ -1,7 +1,8 @@
 import { getCheckout } from '@moneydevkit/nextjs/server';
-import { createMoneyDevKitNode } from './sdk/mdk.js';
+import { createMoneyDevKitNode, createMoneyDevKitClient } from './sdk/mdk.js';
 
 export default async function handler(req, res) {
+    // ... (CORS headers omitted for brevity in thought, but kept in file) ...
     // Enable CORS
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,7 +22,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { id } = req.query; // Vercel puts dynamic route params in req.query
+        const { id } = req.query;
 
         console.log(`Checking payment status for ID: ${id}`);
 
@@ -29,11 +30,35 @@ export default async function handler(req, res) {
         console.log('Syncing node...');
         try {
             const node = createMoneyDevKitNode();
-            await node.receivePayments();
-            console.log('Node sync complete');
+            const events = await node.receivePayments();
+            console.log('Node sync complete. Events:', JSON.stringify(events, null, 2));
+
+            if (Array.isArray(events)) {
+                for (const event of events) {
+                    // Check for PaymentReceived event (structure depends on SDK, checking common patterns)
+                    // Log showed: PaymentReceived { payment_hash: ..., amount_msat: ... }
+                    // It might be an object like { type: 'PaymentReceived', ... } or just the object itself if it's a class instance
+
+                    // We look for payment_hash and amount_msat
+                    const paymentHash = event.payment_hash || event.paymentHash;
+                    const amountMsat = event.amount_msat || event.amountMsat;
+
+                    if (paymentHash && amountMsat) {
+                        console.log(`Found payment: ${paymentHash}, ${amountMsat} msats`);
+                        const client = createMoneyDevKitClient();
+                        await client.checkouts.paymentReceived({
+                            payments: [{
+                                paymentHash: paymentHash,
+                                amountSats: Math.floor(parseInt(amountMsat) / 1000)
+                            }]
+                        });
+                        console.log('Marked payment as received in API');
+                    }
+                }
+            }
+
         } catch (syncError) {
-            console.error('Node sync failed:', syncError);
-            // Continue to check status even if sync fails, in case it was already received
+            console.error('Node sync/processing failed:', syncError);
         }
 
         const checkout = await getCheckout(id);
