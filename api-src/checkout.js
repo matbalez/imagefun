@@ -49,10 +49,13 @@ export default async function handler(req, res) {
             }
         });
 
-        if (checkout && checkout.url) {
-            res.status(200).json({ checkoutUrl: checkout.url });
+        if (checkout && checkout.id) {
+            res.status(200).json({
+                checkoutId: checkout.id,
+                invoice: checkout.invoice
+            });
         } else {
-            res.status(500).json({ error: 'Failed to create checkout URL' });
+            res.status(500).json({ error: 'Failed to create checkout' });
         }
 
     } catch (error) {
