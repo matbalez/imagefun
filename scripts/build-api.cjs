@@ -10,7 +10,7 @@ functions.forEach(file => {
         bundle: true,
         platform: 'node',
         target: 'node18',
-        outfile: `api/${file.replace('.js', '.cjs')}`,
+        outfile: `api/${file}`,
         format: 'cjs',
         footer: { js: 'if (module.exports.default) module.exports = module.exports.default;' },
         external: ['@google/generative-ai'], // Keep this external if it works, or bundle it too to be safe. 

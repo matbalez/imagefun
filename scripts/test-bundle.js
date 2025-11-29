@@ -1,4 +1,4 @@
-import * as mod from '../api/checkout.cjs';
+import * as mod from '../api/checkout.js';
 console.log('Module exports:', mod);
 const handler = mod.default || mod;
 
