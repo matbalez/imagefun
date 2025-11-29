@@ -3,5 +3,17 @@
         "api/**/*.js": {
             "includeFiles": "node_modules/@moneydevkit/**"
         }
-    }
+    },
+    "rewrites": [
+        {
+            "source": "/",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "x-moneydevkit-webhook-secret"
+                }
+            ],
+            "destination": "/api/webhook"
+        }
+    ]
 }
