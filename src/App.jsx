@@ -45,8 +45,16 @@ function Home() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create checkout')
+        const text = await response.text();
+        let errorMessage = `Error ${response.status}: ${response.statusText}`;
+        try {
+          const json = JSON.parse(text);
+          if (json.error) errorMessage = json.error;
+        } catch (e) {
+          // If not JSON, append the first 100 chars of the text to see what it is
+          errorMessage += ` - Response: ${text.substring(0, 100)}...`;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json()
