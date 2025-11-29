@@ -24106,6 +24106,13 @@ async function handler(req, res) {
         type: "nanobanana_generation"
       }
     });
+    console.log("Checkout created:", JSON.stringify(checkout, null, 2));
+    console.log("Invoice details:", checkout.invoice ? JSON.stringify(checkout.invoice, null, 2) : "No invoice");
+    console.log("Environment:", {
+      network: process.env.MDK_NETWORK || "default (mainnet)",
+      hasAccessToken: !!process.env.MDK_ACCESS_TOKEN,
+      hasMnemonic: !!process.env.MDK_MNEMONIC
+    });
     if (checkout && checkout.id) {
       res.status(200).json({
         checkoutId: checkout.id,
