@@ -2,7 +2,7 @@ const esbuild = require('esbuild');
 const fs = require('fs');
 const path = require('path');
 
-const functions = ['checkout.js', 'webhook.js', 'payment-status.js'];
+const functions = ['checkout.js', 'webhook.js', 'payment-status.js', 'generate.js'];
 
 functions.forEach(file => {
     let outfile = `api/${file}`;
