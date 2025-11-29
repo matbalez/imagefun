@@ -30,22 +30,7 @@ export default async function handler(req, res) {
         console.log('Syncing node...');
         try {
             const node = createMoneyDevKitNode();
-
-            // Health check
-            try {
-                const balance = await node.getBalance();
-                console.log('Node balance check:', JSON.stringify(balance));
-            } catch (e) {
-                console.error('Node health check failed:', e);
-            }
-
-            // Wrap receivePayments in a timeout to prevent indefinite hanging
-            const syncPromise = node.receivePayments();
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('receivePayments timed out after 5s')), 5000)
-            );
-
-            const events = await Promise.race([syncPromise, timeoutPromise]);
+            const events = await node.receivePayments();
             console.log('Node sync complete. Events:', JSON.stringify(events, null, 2));
 
             const eventList = Array.isArray(events) ? events : [events];
@@ -83,7 +68,7 @@ export default async function handler(req, res) {
         const checkout = await getCheckout(id);
         console.log(`Status for ${id}:`, checkout ? checkout.status : 'Not found');
 
-        if (checkout && checkout.status === 'PAID') {
+        if (checkout && (checkout.status === 'PAID' || checkout.status === 'PAYMENT_RECEIVED')) {
             res.status(200).json({ paid: true, checkout });
         } else {
             res.status(200).json({ paid: false, status: checkout?.status, checkout });
