@@ -1,4 +1,5 @@
 import { getCheckout } from '@moneydevkit/nextjs/server';
+import { createMoneyDevKitNode } from './sdk/mdk.js';
 
 export default async function handler(req, res) {
     // Enable CORS
@@ -23,6 +24,18 @@ export default async function handler(req, res) {
         const { id } = req.query; // Vercel puts dynamic route params in req.query
 
         console.log(`Checking payment status for ID: ${id}`);
+
+        // Sync the node to receive payments
+        console.log('Syncing node...');
+        try {
+            const node = createMoneyDevKitNode();
+            await node.receivePayments();
+            console.log('Node sync complete');
+        } catch (syncError) {
+            console.error('Node sync failed:', syncError);
+            // Continue to check status even if sync fails, in case it was already received
+        }
+
         const checkout = await getCheckout(id);
         console.log(`Status for ${id}:`, checkout ? checkout.status : 'Not found');
 

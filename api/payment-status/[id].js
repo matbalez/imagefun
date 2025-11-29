@@ -8714,7 +8714,7 @@ var require_agent = __commonJS({
     function defaultFactory(origin, opts) {
       return opts && opts.connections === 1 ? new Client(origin, opts) : new Pool(origin, opts);
     }
-    var Agent2 = class extends DispatcherBase {
+    var Agent3 = class extends DispatcherBase {
       constructor({ factory = defaultFactory, maxOrigins = Infinity, connect, ...options } = {}) {
         if (typeof factory !== "function") {
           throw new InvalidArgumentError("factory must be a function.");
@@ -8821,7 +8821,7 @@ var require_agent = __commonJS({
         return allClientStats;
       }
     };
-    module2.exports = Agent2;
+    module2.exports = Agent3;
   }
 });
 
@@ -8830,7 +8830,7 @@ var require_proxy_agent = __commonJS({
   "node_modules/undici/lib/dispatcher/proxy-agent.js"(exports2, module2) {
     "use strict";
     var { kProxy, kClose, kDestroy, kDispatch } = require_symbols();
-    var Agent2 = require_agent();
+    var Agent3 = require_agent();
     var Pool = require_pool();
     var DispatcherBase = require_dispatcher_base();
     var { InvalidArgumentError, RequestAbortedError, SecureProxyConnectionError } = require_errors();
@@ -8944,7 +8944,7 @@ var require_proxy_agent = __commonJS({
           return agentFactory(origin2, options);
         };
         this[kClient] = clientFactory(url, { connect });
-        this[kAgent] = new Agent2({
+        this[kAgent] = new Agent3({
           ...opts,
           factory,
           connect: async (opts2, callback) => {
@@ -9058,7 +9058,7 @@ var require_env_http_proxy_agent = __commonJS({
     var DispatcherBase = require_dispatcher_base();
     var { kClose, kDestroy, kClosed, kDestroyed, kDispatch, kNoProxyAgent, kHttpProxyAgent, kHttpsProxyAgent } = require_symbols();
     var ProxyAgent = require_proxy_agent();
-    var Agent2 = require_agent();
+    var Agent3 = require_agent();
     var DEFAULT_PORTS = {
       "http:": 80,
       "https:": 443
@@ -9071,7 +9071,7 @@ var require_env_http_proxy_agent = __commonJS({
         super();
         this.#opts = opts;
         const { httpProxy, httpsProxy, noProxy, ...agentOpts } = opts;
-        this[kNoProxyAgent] = new Agent2(agentOpts);
+        this[kNoProxyAgent] = new Agent3(agentOpts);
         const HTTP_PROXY = httpProxy ?? process.env.http_proxy ?? process.env.HTTP_PROXY;
         if (HTTP_PROXY) {
           this[kHttpProxyAgent] = new ProxyAgent({ ...agentOpts, uri: HTTP_PROXY });
@@ -11468,13 +11468,13 @@ var require_mock_call_history = __commonJS({
     function makeFilterCalls(parameterName) {
       return (parameterValue) => {
         if (typeof parameterValue === "string" || parameterValue == null) {
-          return this.logs.filter((log2) => {
-            return log2[parameterName] === parameterValue;
+          return this.logs.filter((log3) => {
+            return log3[parameterName] === parameterValue;
           });
         }
         if (parameterValue instanceof RegExp) {
-          return this.logs.filter((log2) => {
-            return parameterValue.test(log2[parameterName]);
+          return this.logs.filter((log3) => {
+            return parameterValue.test(log3[parameterName]);
           });
         }
         throw new InvalidArgumentError(`${parameterName} parameter should be one of string, regexp, undefined or null`);
@@ -11569,8 +11569,8 @@ var require_mock_call_history = __commonJS({
           return this.logs.filter(criteria);
         }
         if (criteria instanceof RegExp) {
-          return this.logs.filter((log2) => {
-            return criteria.test(log2.toString());
+          return this.logs.filter((log3) => {
+            return criteria.test(log3.toString());
           });
         }
         if (typeof criteria === "object" && criteria !== null) {
@@ -11620,13 +11620,13 @@ var require_mock_call_history = __commonJS({
         this.logs = [];
       }
       [kMockCallHistoryAddLog](requestInit) {
-        const log2 = new MockCallHistoryLog(requestInit);
-        this.logs.push(log2);
-        return log2;
+        const log3 = new MockCallHistoryLog(requestInit);
+        this.logs.push(log3);
+        return log3;
       }
       *[Symbol.iterator]() {
-        for (const log2 of this.calls()) {
-          yield log2;
+        for (const log3 of this.calls()) {
+          yield log3;
         }
       }
     };
@@ -11742,7 +11742,7 @@ var require_mock_agent = __commonJS({
   "node_modules/undici/lib/mock/mock-agent.js"(exports2, module2) {
     "use strict";
     var { kClients } = require_symbols();
-    var Agent2 = require_agent();
+    var Agent3 = require_agent();
     var {
       kAgent,
       kMockAgentSet,
@@ -11780,7 +11780,7 @@ var require_mock_agent = __commonJS({
         if (opts?.agent && typeof opts.agent.dispatch !== "function") {
           throw new InvalidArgumentError("Argument opts.agent must implement Agent");
         }
-        const agent = opts?.agent ? opts.agent : new Agent2(opts);
+        const agent = opts?.agent ? opts.agent : new Agent3(opts);
         this[kAgent] = agent;
         this[kClients] = agent[kClients];
         this[kOptions] = mockOptions;
@@ -12381,7 +12381,7 @@ var require_snapshot_recorder = __commonJS({
 var require_snapshot_agent = __commonJS({
   "node_modules/undici/lib/mock/snapshot-agent.js"(exports2, module2) {
     "use strict";
-    var Agent2 = require_agent();
+    var Agent3 = require_agent();
     var MockAgent = require_mock_agent();
     var { SnapshotRecorder } = require_snapshot_recorder();
     var WrapHandler = require_wrap_handler();
@@ -12432,7 +12432,7 @@ var require_snapshot_agent = __commonJS({
         });
         this[kSnapshotLoaded] = false;
         if (this[kSnapshotMode] === "record" || this[kSnapshotMode] === "update") {
-          this[kRealAgent] = new Agent2(opts);
+          this[kRealAgent] = new Agent3(opts);
         }
         if ((this[kSnapshotMode] === "playback" || this[kSnapshotMode] === "update") && this[kSnapshotPath]) {
           this.loadSnapshots().catch(() => {
@@ -12671,11 +12671,11 @@ var require_global2 = __commonJS({
     "use strict";
     var globalDispatcher = Symbol.for("undici.globalDispatcher.1");
     var { InvalidArgumentError } = require_errors();
-    var Agent2 = require_agent();
+    var Agent3 = require_agent();
     if (getGlobalDispatcher() === void 0) {
-      setGlobalDispatcher2(new Agent2());
+      setGlobalDispatcher3(new Agent3());
     }
-    function setGlobalDispatcher2(agent) {
+    function setGlobalDispatcher3(agent) {
       if (!agent || typeof agent.dispatch !== "function") {
         throw new InvalidArgumentError("Argument agent must implement Agent");
       }
@@ -12705,7 +12705,7 @@ var require_global2 = __commonJS({
       ]
     );
     module2.exports = {
-      setGlobalDispatcher: setGlobalDispatcher2,
+      setGlobalDispatcher: setGlobalDispatcher3,
       getGlobalDispatcher,
       installedExports
     };
@@ -22302,7 +22302,7 @@ var require_undici = __commonJS({
     var Dispatcher = require_dispatcher();
     var Pool = require_pool();
     var BalancedPool = require_balanced_pool();
-    var Agent2 = require_agent();
+    var Agent3 = require_agent();
     var ProxyAgent = require_proxy_agent();
     var EnvHttpProxyAgent = require_env_http_proxy_agent();
     var RetryAgent = require_retry_agent();
@@ -22319,7 +22319,7 @@ var require_undici = __commonJS({
     var SnapshotAgent = require_snapshot_agent();
     var mockErrors = require_mock_errors();
     var RetryHandler = require_retry_handler();
-    var { getGlobalDispatcher, setGlobalDispatcher: setGlobalDispatcher2 } = require_global2();
+    var { getGlobalDispatcher, setGlobalDispatcher: setGlobalDispatcher3 } = require_global2();
     var DecoratorHandler = require_decorator_handler();
     var RedirectHandler = require_redirect_handler();
     Object.assign(Dispatcher.prototype, api);
@@ -22327,7 +22327,7 @@ var require_undici = __commonJS({
     module2.exports.Client = Client;
     module2.exports.Pool = Pool;
     module2.exports.BalancedPool = BalancedPool;
-    module2.exports.Agent = Agent2;
+    module2.exports.Agent = Agent3;
     module2.exports.ProxyAgent = ProxyAgent;
     module2.exports.EnvHttpProxyAgent = EnvHttpProxyAgent;
     module2.exports.RetryAgent = RetryAgent;
@@ -22394,7 +22394,7 @@ var require_undici = __commonJS({
         }, handler2);
       };
     }
-    module2.exports.setGlobalDispatcher = setGlobalDispatcher2;
+    module2.exports.setGlobalDispatcher = setGlobalDispatcher3;
     module2.exports.getGlobalDispatcher = getGlobalDispatcher;
     var fetchImpl = require_fetch().fetch;
     module2.exports.fetch = function fetch(init, options = void 0) {
@@ -23926,6 +23926,416 @@ async function getCheckout2(...args) {
   return getCheckout(...args);
 }
 
+// api-src/sdk/lightning-node.js
+var import_module2 = require("module");
+
+// api-src/sdk/logging.js
+var loggingEnabled3 = true;
+var isLoggingEnabled2 = () => loggingEnabled3;
+var log2 = (...args) => {
+  if (!loggingEnabled3) {
+    return;
+  }
+  console.log(...args);
+};
+var warn2 = (...args) => {
+  if (!loggingEnabled3) {
+    return;
+  }
+  console.warn(...args);
+};
+
+// api-src/sdk/lightning-logs.js
+var loggingEnabled4 = isLoggingEnabled2();
+var LOG_GROUP_SIZE2 = Number.parseInt(process.env.MDK_LIGHTNING_LOG_GROUP_SIZE ?? "", 10) || 6;
+var LOG_GROUP_FLUSH_INTERVAL_MS2 = Number.parseInt(process.env.MDK_LIGHTNING_LOG_GROUP_INTERVAL_MS ?? "", 10) || 250;
+var LOG_MAX_LINE_BYTES2 = 256 * 1024;
+var LOG_MAX_SUM_BYTES2 = 1024 * 1024;
+var LightningLogAggregator2 = class {
+  buffer = [];
+  bufferedBytes = 0;
+  flushTimer = null;
+  add(entry) {
+    const serialized = this.prepare(entry);
+    const bytes = Buffer.byteLength(serialized, "utf8");
+    if (bytes >= LOG_MAX_LINE_BYTES2) {
+      this.flush();
+      log2(JSON.stringify({
+        source: "mdk-lightning",
+        truncated: true,
+        preview: serialized.slice(0, LOG_MAX_LINE_BYTES2 - 100)
+      }));
+      return;
+    }
+    if (this.bufferedBytes + bytes > Math.min(LOG_MAX_SUM_BYTES2, LOG_MAX_LINE_BYTES2)) {
+      this.flush();
+    }
+    this.buffer.push(serialized);
+    this.bufferedBytes += bytes;
+    if (this.buffer.length >= LOG_GROUP_SIZE2 || this.bufferedBytes >= LOG_MAX_LINE_BYTES2) {
+      this.flush();
+    } else {
+      this.ensureTimer();
+    }
+  }
+  flush() {
+    if (this.buffer.length === 0) {
+      return;
+    }
+    const payload = {
+      source: "mdk-lightning",
+      entries: this.buffer
+    };
+    log2(JSON.stringify(payload));
+    this.buffer = [];
+    this.bufferedBytes = 0;
+    this.clearTimer();
+  }
+  ensureTimer() {
+    if (this.flushTimer) {
+      return;
+    }
+    this.flushTimer = setTimeout(() => {
+      this.flushTimer = null;
+      this.flush();
+    }, LOG_GROUP_FLUSH_INTERVAL_MS2);
+    if (typeof this.flushTimer.unref === "function") {
+      this.flushTimer.unref();
+    }
+  }
+  clearTimer() {
+    if (!this.flushTimer) {
+      return;
+    }
+    clearTimeout(this.flushTimer);
+    this.flushTimer = null;
+  }
+  prepare(entry) {
+    const normalised = this.normalise(entry);
+    const coerced = this.coerce(normalised);
+    return this.ensureSerializable(coerced);
+  }
+  ensureSerializable(value2) {
+    if (typeof value2 === "string") {
+      return value2;
+    }
+    try {
+      return JSON.stringify(value2);
+    } catch (error) {
+      const fallback = `[lightning-log] Failed to stringify entry: ${String(error)}`;
+      return fallback;
+    }
+  }
+  coerce(value2) {
+    if (value2 == null) {
+      return "";
+    }
+    if (Buffer.isBuffer(value2)) {
+      return this.coerce(value2.toString("utf8"));
+    }
+    if (typeof value2 === "string") {
+      const trimmed = value2.trim();
+      if (trimmed.startsWith("{") && trimmed.endsWith("}") || trimmed.startsWith("[") && trimmed.endsWith("]")) {
+        try {
+          return JSON.parse(trimmed);
+        } catch {
+          return value2;
+        }
+      }
+      return value2;
+    }
+    return value2;
+  }
+  normalise(entry) {
+    if (entry instanceof Error) {
+      return {
+        source: "mdk-lightning",
+        level: "error",
+        name: entry.name,
+        message: entry.message,
+        stack: entry.stack
+      };
+    }
+    if (typeof entry === "object" && entry !== null) {
+      return entry;
+    }
+    return entry;
+  }
+};
+var lightningLogAggregator2 = new LightningLogAggregator2();
+var lightningLogHandler2 = (entry) => {
+  if (!loggingEnabled4) {
+    return;
+  }
+  lightningLogAggregator2.add(entry);
+};
+var lightningLogErrorHandler2 = (error) => {
+  if (!loggingEnabled4) {
+    return;
+  }
+  const payload = error instanceof Error ? {
+    level: "error",
+    name: error.name,
+    message: error.message,
+    stack: error.stack
+  } : {
+    level: "error",
+    error
+  };
+  lightningLogAggregator2.add(payload);
+};
+var registerAggregatorFlush2 = /* @__PURE__ */ (() => {
+  let registered = false;
+  return () => {
+    if (registered) {
+      return;
+    }
+    registered = true;
+    const flush = () => {
+      try {
+        lightningLogAggregator2.flush();
+      } catch (error) {
+        warn2("MoneyDevKit lightning log flush failed", error);
+      }
+    };
+    process.on("beforeExit", flush);
+    process.on("exit", flush);
+    process.on("SIGINT", flush);
+    process.on("SIGTERM", flush);
+  };
+})();
+if (loggingEnabled4) {
+  registerAggregatorFlush2();
+}
+
+// api-src/sdk/mdk-config.js
+var MAINNET_MDK_BASE_URL2 = "https://moneydevkit.com/rpc";
+var SIGNET_MDK_BASE_URL2 = "https://staging.moneydevkit.com/rpc";
+var MAINNET_MDK_NODE_OPTIONS2 = {
+  network: "mainnet",
+  vssUrl: "https://vss.moneydevkit.com/vss",
+  esploraUrl: "https://esplora.moneydevkit.com/api",
+  rgsUrl: "https://rapidsync.lightningdevkit.org/snapshot",
+  lspNodeId: "02a63339cc6b913b6330bd61b2f469af8785a6011a6305bb102298a8e76697473b",
+  lspAddress: "lsp.moneydevkit.com:9735"
+};
+var SIGNET_MDK_NODE_OPTIONS2 = {
+  network: "signet",
+  vssUrl: "https://vss.staging.moneydevkit.com/vss",
+  esploraUrl: "https://mutinynet.com/api",
+  rgsUrl: "https://rgs.mutinynet.com/snapshot",
+  lspNodeId: "03fd9a377576df94cc7e458471c43c400630655083dee89df66c6ad38d1b7acffd",
+  lspAddress: "lsp.staging.moneydevkit.com:9735"
+};
+
+// api-src/sdk/undici-dispatcher.js
+var import_undici2 = __toESM(require_undici(), 1);
+var ensureUndiciDispatcher2 = () => {
+  if (globalThis.__mdkUndiciDispatcherConfigured) {
+    return;
+  }
+  (0, import_undici2.setGlobalDispatcher)(new import_undici2.Agent({
+    keepAliveTimeout: 1,
+    keepAliveTimeoutThreshold: 1
+  }));
+  globalThis.__mdkUndiciDispatcherConfigured = true;
+};
+ensureUndiciDispatcher2();
+
+// api-src/sdk/lightning-node.js
+var import_meta2 = {};
+ensureUndiciDispatcher2();
+process.env.RUST_LOG ??= "ldk_node=trace,lightning_background_processor=trace,vss_client=trace,reqwest=debug";
+var OPTIONAL_LIGHTNING_PACKAGES2 = [
+  "@moneydevkit/lightning-js-linux-x64-gnu",
+  "@moneydevkit/lightning-js-linux-x64-musl",
+  "@moneydevkit/lightning-js-linux-arm64-gnu",
+  "@moneydevkit/lightning-js-linux-arm64-musl",
+  "@moneydevkit/lightning-js-linux-arm-gnueabihf",
+  "@moneydevkit/lightning-js-android-arm64",
+  "@moneydevkit/lightning-js-android-arm-eabi",
+  "@moneydevkit/lightning-js-win32-x64-msvc",
+  "@moneydevkit/lightning-js-win32-ia32-msvc",
+  "@moneydevkit/lightning-js-win32-arm64-msvc",
+  "@moneydevkit/lightning-js-darwin-x64",
+  "@moneydevkit/lightning-js-darwin-arm64",
+  "@moneydevkit/lightning-js-freebsd-x64"
+];
+var cachedLightningModule;
+var getRuntimeRequire2 = () => {
+  if (typeof __non_webpack_require__ === "function") {
+    return __non_webpack_require__;
+  }
+  try {
+    return (0, import_module2.createRequire)(import_meta2.url);
+  } catch (error) {
+    if (typeof require === "function") {
+      return require;
+    }
+    throw error;
+  }
+};
+var ensureLightningPackagesForTracing2 = () => {
+  const runtimeRequire = getRuntimeRequire2();
+  const specifiers = ["@moneydevkit/lightning-js", ...OPTIONAL_LIGHTNING_PACKAGES2];
+  for (const specifier of specifiers) {
+    try {
+      if (typeof runtimeRequire.resolve === "function") {
+        runtimeRequire.resolve(specifier);
+      }
+    } catch {
+    }
+  }
+};
+ensureLightningPackagesForTracing2();
+var loadLightningModule = () => {
+  if (!cachedLightningModule) {
+    const runtimeRequire = getRuntimeRequire2();
+    cachedLightningModule = runtimeRequire("@moneydevkit/lightning-js");
+  }
+  return cachedLightningModule;
+};
+var RECEIVE_PAYMENTS_MIN_THRESHOLD_MS = 3e3;
+var RECEIVE_PAYMENTS_QUIET_THRESHOLD_MS = 3e3;
+var MoneyDevKitNode2 = class {
+  node;
+  constructor(options) {
+    const { MdkNode, setLogListener } = loadLightningModule();
+    setLogListener((err, entry) => {
+      if (err) {
+        lightningLogErrorHandler2(err);
+        return;
+      }
+      lightningLogHandler2(entry);
+    }, "TRACE");
+    const network = options.nodeOptions?.network ?? MAINNET_MDK_NODE_OPTIONS2.network;
+    const defaultNodeOptions = network === "signet" ? SIGNET_MDK_NODE_OPTIONS2 : MAINNET_MDK_NODE_OPTIONS2;
+    this.node = new MdkNode({
+      network,
+      mdkApiKey: options.accessToken,
+      vssUrl: options.nodeOptions?.vssUrl ?? defaultNodeOptions.vssUrl,
+      esploraUrl: options.nodeOptions?.esploraUrl ?? defaultNodeOptions.esploraUrl,
+      rgsUrl: options.nodeOptions?.rgsUrl ?? defaultNodeOptions.rgsUrl,
+      mnemonic: options.mnemonic,
+      lspNodeId: options.nodeOptions?.lspNodeId ?? defaultNodeOptions.lspNodeId,
+      lspAddress: options.nodeOptions?.lspAddress ?? defaultNodeOptions.lspAddress
+    });
+  }
+  get id() {
+    return this.node.getNodeId();
+  }
+  receivePayments() {
+    return this.node.receivePayment(RECEIVE_PAYMENTS_MIN_THRESHOLD_MS, RECEIVE_PAYMENTS_QUIET_THRESHOLD_MS);
+  }
+  payBolt12Offer(bolt12, amountMsat) {
+    return this.node.payBolt12Offer(bolt12, amountMsat);
+  }
+  payBolt11(bolt11) {
+    return this.node.payBolt11(bolt11);
+  }
+  payLNUrl(lnurl, amountMsat) {
+    return this.node.payLnurl(lnurl, amountMsat, 15);
+  }
+  listChannels() {
+    return this.node.listChannels();
+  }
+  syncWallets() {
+    return this.node.syncWallets();
+  }
+  getBalance() {
+    return this.node.getBalance();
+  }
+  get invoices() {
+    return {
+      create: (amountSats) => {
+        const expirySecs = 15 * 60;
+        const description = "mdk invoice";
+        const invoice = amountSats === null ? this.node.getVariableAmountJitInvoice(description, expirySecs) : this.node.getInvoice(amountSats * 1e3, description, expirySecs);
+        return {
+          invoice: invoice.bolt11,
+          paymentHash: invoice.paymentHash,
+          scid: invoice.scid,
+          expiresAt: new Date(invoice.expiresAt * 1e3)
+        };
+      },
+      createWithScid: (scid, amountSats) => {
+        const expirySecs = 15 * 60;
+        const description = "mdk invoice";
+        const invoice = amountSats === null ? this.node.getVariableAmountJitInvoiceWithScid(scid, description, expirySecs) : this.node.getInvoiceWithScid(scid, amountSats * 1e3, description, expirySecs);
+        return {
+          invoice: invoice.bolt11,
+          paymentHash: invoice.paymentHash,
+          scid: invoice.scid,
+          expiresAt: new Date(invoice.expiresAt * 1e3)
+        };
+      }
+    };
+  }
+};
+
+// api-src/sdk/mdk-client.js
+ensureUndiciDispatcher2();
+
+// api-src/sdk/mdk.js
+function readEnv2() {
+  const nodeOptions = {};
+  if (process.env.MDK_NETWORK) {
+    nodeOptions.network = process.env.MDK_NETWORK;
+  }
+  if (process.env.MDK_VSS_URL) {
+    nodeOptions.vssUrl = process.env.MDK_VSS_URL;
+  }
+  if (process.env.MDK_ESPLORA_URL) {
+    nodeOptions.esploraUrl = process.env.MDK_ESPLORA_URL;
+  }
+  if (process.env.MDK_RGS_URL) {
+    nodeOptions.rgsUrl = process.env.MDK_RGS_URL;
+  }
+  if (process.env.MDK_LSP_NODE_ID) {
+    nodeOptions.lspNodeId = process.env.MDK_LSP_NODE_ID;
+  }
+  if (process.env.MDK_LSP_ADDRESS) {
+    nodeOptions.lspAddress = process.env.MDK_LSP_ADDRESS;
+  }
+  return {
+    accessToken: process.env.MDK_ACCESS_TOKEN,
+    mnemonic: process.env.MDK_MNEMONIC,
+    baseUrl: process.env.MDK_API_BASE_URL,
+    nodeOptions: Object.keys(nodeOptions).length > 0 ? nodeOptions : void 0
+  };
+}
+function resolveMoneyDevKitOptions2() {
+  const env = readEnv2();
+  const { accessToken, mnemonic, baseUrl, nodeOptions } = env;
+  if (!accessToken || !mnemonic) {
+    throw new Error("MoneyDevKit requires MDK_ACCESS_TOKEN and MDK_MNEMONIC environment variables to be configured.");
+  }
+  const overrides = nodeOptions ?? {};
+  const networkOverride = overrides.network ?? MAINNET_MDK_NODE_OPTIONS2.network;
+  const defaultNodeOptions = networkOverride === "signet" ? SIGNET_MDK_NODE_OPTIONS2 : MAINNET_MDK_NODE_OPTIONS2;
+  const mergedNodeOptions = {
+    ...defaultNodeOptions,
+    ...overrides
+  };
+  const network = mergedNodeOptions.network ?? defaultNodeOptions.network;
+  mergedNodeOptions.network = network;
+  const resolvedBaseUrl = baseUrl ?? (network === "signet" ? SIGNET_MDK_BASE_URL2 : MAINNET_MDK_BASE_URL2);
+  return {
+    accessToken,
+    mnemonic,
+    baseUrl: resolvedBaseUrl,
+    nodeOptions: mergedNodeOptions
+  };
+}
+function createMoneyDevKitNode2() {
+  const resolved = resolveMoneyDevKitOptions2();
+  return new MoneyDevKitNode2({
+    accessToken: resolved.accessToken,
+    mnemonic: resolved.mnemonic,
+    nodeOptions: resolved.nodeOptions
+  });
+}
+
 // api-src/payment-status.js
 async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Credentials", true);
@@ -23945,6 +24355,14 @@ async function handler(req, res) {
   try {
     const { id } = req.query;
     console.log(`Checking payment status for ID: ${id}`);
+    console.log("Syncing node...");
+    try {
+      const node = createMoneyDevKitNode2();
+      await node.receivePayments();
+      console.log("Node sync complete");
+    } catch (syncError) {
+      console.error("Node sync failed:", syncError);
+    }
     const checkout = await getCheckout2(id);
     console.log(`Status for ${id}:`, checkout ? checkout.status : "Not found");
     if (checkout && checkout.status === "PAID") {
