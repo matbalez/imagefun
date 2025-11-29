@@ -24,6 +24,9 @@
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.6"
   },
+  "optionalDependencies": {
+    "@moneydevkit/lightning-js-linux-x64-gnu": "0.1.52"
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/react": "^19.2.5",

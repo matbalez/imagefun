@@ -1,7 +1,7 @@
 {
     "functions": {
         "api/*.js": {
-            "includeFiles": "node_modules/@moneydevkit/lightning-js/**"
+            "includeFiles": "node_modules/@moneydevkit/**"
         }
     }
 }
