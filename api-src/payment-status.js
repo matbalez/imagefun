@@ -44,7 +44,8 @@ export default async function handler(req, res) {
                 // Case 1: Object with properties
                 if (typeof event === 'object') {
                     paymentHash = event.payment_hash || event.paymentHash;
-                    amountMsat = event.amount_msat || event.amountMsat;
+                    // The logs show 'amount' is used in the JS object (value is in msats)
+                    amountMsat = event.amount_msat || event.amountMsat || event.amount;
                 }
 
                 // Case 2: String representation (Rust debug output)

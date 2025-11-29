@@ -24408,7 +24408,7 @@ async function handler(req, res) {
         let paymentHash, amountMsat;
         if (typeof event === "object") {
           paymentHash = event.payment_hash || event.paymentHash;
-          amountMsat = event.amount_msat || event.amountMsat;
+          amountMsat = event.amount_msat || event.amountMsat || event.amount;
         }
         if (!paymentHash && typeof event === "string") {
           console.log("Parsing string event:", event);
