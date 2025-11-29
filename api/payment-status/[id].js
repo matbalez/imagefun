@@ -24399,7 +24399,17 @@ async function handler(req, res) {
     console.log("Syncing node...");
     try {
       const node = createMoneyDevKitNode2();
-      const events = await node.receivePayments();
+      try {
+        const balance = await node.getBalance();
+        console.log("Node balance check:", JSON.stringify(balance));
+      } catch (e) {
+        console.error("Node health check failed:", e);
+      }
+      const syncPromise = node.receivePayments();
+      const timeoutPromise = new Promise(
+        (_, reject) => setTimeout(() => reject(new Error("receivePayments timed out after 5s")), 5e3)
+      );
+      const events = await Promise.race([syncPromise, timeoutPromise]);
       console.log("Node sync complete. Events:", JSON.stringify(events, null, 2));
       const eventList = Array.isArray(events) ? events : [events];
       for (const event of eventList) {
