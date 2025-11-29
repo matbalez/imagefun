@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import Success from './Success';
+import CheckoutPage from './CheckoutPage';
 import './index.css'
 
 function Home() {
@@ -50,11 +51,11 @@ function Home() {
 
       const data = await response.json()
 
-      if (data.checkoutUrl) {
-        // 2. Redirect to MoneyDevKit
-        window.location.href = data.checkoutUrl;
+      if (data.checkoutId) {
+        // 2. Navigate to local Checkout Page
+        navigate(`/checkout/${data.checkoutId}?word=${encodeURIComponent(word)}&feeling=${encodeURIComponent(feeling)}`);
       } else {
-        throw new Error('No checkout URL received')
+        throw new Error('No checkout ID received')
       }
 
     } catch (err) {
@@ -107,6 +108,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/checkout/:id" element={<CheckoutPage />} />
         <Route path="/success" element={<Success />} />
       </Routes>
     </Router>

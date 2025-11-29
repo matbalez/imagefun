@@ -36,6 +36,7 @@ app.post('/api/checkout', async (req, res) => {
 
         console.log('Creating checkout with success URL:', successUrl);
 
+        console.log('Calling createCheckout...');
         const checkout = await createCheckout({
             amount: 100,
             currency: 'USD',
@@ -45,10 +46,15 @@ app.post('/api/checkout', async (req, res) => {
             metadata: { word, feeling }
         });
 
-        if (checkout && checkout.url) {
-            res.json({ checkoutUrl: checkout.url });
+        console.log('Checkout result:', JSON.stringify(checkout, null, 2));
+
+        if (checkout && checkout.id) {
+            res.json({
+                checkoutId: checkout.id,
+                invoice: checkout.invoice
+            });
         } else {
-            res.status(500).json({ error: 'Failed to create checkout URL' });
+            res.status(500).json({ error: 'Failed to create checkout' });
         }
     } catch (error) {
         console.error('Error creating checkout:', error);
