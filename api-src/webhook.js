@@ -16,46 +16,67 @@ export default async function handler(req, res) {
     }
 
     try {
-        console.log('Webhook received. Triggering node sync...');
+        console.log('Webhook received. Body:', JSON.stringify(req.body, null, 2));
 
-        // Sync the node to receive/claim payments
-        // This is triggered by the LSP notifying us of activity
-        try {
-            const node = createMoneyDevKitNode();
-            const events = await node.receivePayments();
-            console.log('Node sync complete. Events:', JSON.stringify(events, null, 2));
+        const { payment_hash, amount_msat, amount } = req.body || {};
+        const paymentHash = payment_hash || req.body?.paymentHash;
+        const amountVal = amount_msat || amount || req.body?.amountMsat;
 
-            const eventList = Array.isArray(events) ? events : [events];
+        // STRATEGY:
+        // 1. If payload has payment info, use it directly (FAST).
+        // 2. If not, sync the node (FALLBACK).
 
-            for (const event of eventList) {
-                if (!event) continue;
-
-                // Handle both property names seen in logs/SDK
-                const paymentHash = event.payment_hash || event.paymentHash;
-                const amountMsat = event.amount_msat || event.amountMsat || event.amount;
-
-                if (paymentHash && amountMsat) {
-                    console.log(`Found payment: ${paymentHash}, ${amountMsat} msats`);
-                    try {
-                        const client = createMoneyDevKitClient();
-                        const result = await client.checkouts.paymentReceived({
-                            payments: [{
-                                paymentHash: paymentHash,
-                                amountSats: Math.floor(parseInt(amountMsat) / 1000)
-                            }]
-                        });
-                        console.log('Marked payment as received in API. Result:', JSON.stringify(result));
-                    } catch (apiError) {
-                        console.error('Failed to call paymentReceived API:', apiError);
-                    }
-                } else {
-                    console.log('Skipping event (missing hash or amount):', JSON.stringify(event));
-                }
+        if (paymentHash && amountVal) {
+            console.log(`Payload contains payment info: ${paymentHash}, ${amountVal} msats`);
+            try {
+                const client = createMoneyDevKitClient();
+                const result = await client.checkouts.paymentReceived({
+                    payments: [{
+                        paymentHash: paymentHash,
+                        amountSats: Math.floor(parseInt(amountVal) / 1000)
+                    }]
+                });
+                console.log('Marked payment as received via payload. Result:', JSON.stringify(result));
+            } catch (apiError) {
+                console.error('Failed to call paymentReceived API from payload:', apiError);
             }
+        } else {
+            console.log('Payload missing direct payment info. Falling back to node sync...');
 
-        } catch (syncError) {
-            console.error('Node sync/processing failed:', syncError);
-            // We don't fail the webhook request itself, as we might want to retry or just log it
+            // Sync the node to receive/claim payments
+            try {
+                const node = createMoneyDevKitNode();
+                const events = await node.receivePayments();
+                console.log('Node sync complete. Events:', JSON.stringify(events, null, 2));
+
+                const eventList = Array.isArray(events) ? events : [events];
+
+                for (const event of eventList) {
+                    if (!event) continue;
+
+                    const pHash = event.payment_hash || event.paymentHash;
+                    const amt = event.amount_msat || event.amountMsat || event.amount;
+
+                    if (pHash && amt) {
+                        console.log(`Found payment via sync: ${pHash}, ${amt} msats`);
+                        try {
+                            const client = createMoneyDevKitClient();
+                            const result = await client.checkouts.paymentReceived({
+                                payments: [{
+                                    paymentHash: pHash,
+                                    amountSats: Math.floor(parseInt(amt) / 1000)
+                                }]
+                            });
+                            console.log('Marked payment as received via sync. Result:', JSON.stringify(result));
+                        } catch (apiError) {
+                            console.error('Failed to call paymentReceived API via sync:', apiError);
+                        }
+                    }
+                }
+
+            } catch (syncError) {
+                console.error('Node sync/processing failed:', syncError);
+            }
         }
 
         res.status(200).json({ received: true });

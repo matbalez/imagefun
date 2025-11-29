@@ -26,10 +26,6 @@ export default async function handler(req, res) {
 
         console.log(`Checking payment status for ID: ${id}`);
 
-        // Note: Node sync is now handled by the webhook handler (api/webhook.js)
-        // This endpoint just checks the status from the MDK API, which is updated by the webhook.
-        // This makes the client-side polling much faster.
-
         const checkout = await getCheckout(id);
         console.log(`Status for ${id}:`, checkout ? checkout.status : 'Not found');
 
