@@ -24063,27 +24063,6 @@ var LightningLogAggregator2 = class {
   }
 };
 var lightningLogAggregator2 = new LightningLogAggregator2();
-var lightningLogHandler2 = (entry) => {
-  if (!loggingEnabled4) {
-    return;
-  }
-  lightningLogAggregator2.add(entry);
-};
-var lightningLogErrorHandler2 = (error) => {
-  if (!loggingEnabled4) {
-    return;
-  }
-  const payload = error instanceof Error ? {
-    level: "error",
-    name: error.name,
-    message: error.message,
-    stack: error.stack
-  } : {
-    level: "error",
-    error
-  };
-  lightningLogAggregator2.add(payload);
-};
 var registerAggregatorFlush2 = /* @__PURE__ */ (() => {
   let registered = false;
   return () => {
@@ -24107,26 +24086,6 @@ var registerAggregatorFlush2 = /* @__PURE__ */ (() => {
 if (loggingEnabled4) {
   registerAggregatorFlush2();
 }
-
-// api-src/sdk/mdk-config.js
-var MAINNET_MDK_BASE_URL2 = "https://moneydevkit.com/rpc";
-var SIGNET_MDK_BASE_URL2 = "https://staging.moneydevkit.com/rpc";
-var MAINNET_MDK_NODE_OPTIONS2 = {
-  network: "mainnet",
-  vssUrl: "https://vss.moneydevkit.com/vss",
-  esploraUrl: "https://esplora.moneydevkit.com/api",
-  rgsUrl: "https://rapidsync.lightningdevkit.org/snapshot",
-  lspNodeId: "02a63339cc6b913b6330bd61b2f469af8785a6011a6305bb102298a8e76697473b",
-  lspAddress: "lsp.moneydevkit.com:9735"
-};
-var SIGNET_MDK_NODE_OPTIONS2 = {
-  network: "signet",
-  vssUrl: "https://vss.staging.moneydevkit.com/vss",
-  esploraUrl: "https://mutinynet.com/api",
-  rgsUrl: "https://rgs.mutinynet.com/snapshot",
-  lspNodeId: "03fd9a377576df94cc7e458471c43c400630655083dee89df66c6ad38d1b7acffd",
-  lspAddress: "lsp.staging.moneydevkit.com:9735"
-};
 
 // api-src/sdk/undici-dispatcher.js
 var import_undici2 = __toESM(require_undici(), 1);
@@ -24161,7 +24120,6 @@ var OPTIONAL_LIGHTNING_PACKAGES2 = [
   "@moneydevkit/lightning-js-darwin-arm64",
   "@moneydevkit/lightning-js-freebsd-x64"
 ];
-var cachedLightningModule;
 var getRuntimeRequire2 = () => {
   if (typeof __non_webpack_require__ === "function") {
     return __non_webpack_require__;
@@ -24188,194 +24146,9 @@ var ensureLightningPackagesForTracing2 = () => {
   }
 };
 ensureLightningPackagesForTracing2();
-var loadLightningModule = () => {
-  if (!cachedLightningModule) {
-    const runtimeRequire = getRuntimeRequire2();
-    cachedLightningModule = runtimeRequire("@moneydevkit/lightning-js");
-  }
-  return cachedLightningModule;
-};
-var RECEIVE_PAYMENTS_MIN_THRESHOLD_MS = 500;
-var RECEIVE_PAYMENTS_QUIET_THRESHOLD_MS = 500;
-var MoneyDevKitNode2 = class {
-  node;
-  constructor(options) {
-    const { MdkNode, setLogListener } = loadLightningModule();
-    setLogListener((err, entry) => {
-      if (err) {
-        lightningLogErrorHandler2(err);
-        return;
-      }
-      lightningLogHandler2(entry);
-    }, "TRACE");
-    const network = options.nodeOptions?.network ?? MAINNET_MDK_NODE_OPTIONS2.network;
-    const defaultNodeOptions = network === "signet" ? SIGNET_MDK_NODE_OPTIONS2 : MAINNET_MDK_NODE_OPTIONS2;
-    this.node = new MdkNode({
-      network,
-      mdkApiKey: options.accessToken,
-      vssUrl: options.nodeOptions?.vssUrl ?? defaultNodeOptions.vssUrl,
-      esploraUrl: options.nodeOptions?.esploraUrl ?? defaultNodeOptions.esploraUrl,
-      rgsUrl: options.nodeOptions?.rgsUrl ?? defaultNodeOptions.rgsUrl,
-      mnemonic: options.mnemonic,
-      lspNodeId: options.nodeOptions?.lspNodeId ?? defaultNodeOptions.lspNodeId,
-      lspAddress: options.nodeOptions?.lspAddress ?? defaultNodeOptions.lspAddress
-    });
-  }
-  get id() {
-    return this.node.getNodeId();
-  }
-  receivePayments() {
-    return this.node.receivePayment(RECEIVE_PAYMENTS_MIN_THRESHOLD_MS, RECEIVE_PAYMENTS_QUIET_THRESHOLD_MS);
-  }
-  payBolt12Offer(bolt12, amountMsat) {
-    return this.node.payBolt12Offer(bolt12, amountMsat);
-  }
-  payBolt11(bolt11) {
-    return this.node.payBolt11(bolt11);
-  }
-  payLNUrl(lnurl, amountMsat) {
-    return this.node.payLnurl(lnurl, amountMsat, 15);
-  }
-  listChannels() {
-    return this.node.listChannels();
-  }
-  syncWallets() {
-    return this.node.syncWallets();
-  }
-  getBalance() {
-    return this.node.getBalance();
-  }
-  get invoices() {
-    return {
-      create: (amountSats) => {
-        const expirySecs = 15 * 60;
-        const description = "mdk invoice";
-        const invoice = amountSats === null ? this.node.getVariableAmountJitInvoice(description, expirySecs) : this.node.getInvoice(amountSats * 1e3, description, expirySecs);
-        return {
-          invoice: invoice.bolt11,
-          paymentHash: invoice.paymentHash,
-          scid: invoice.scid,
-          expiresAt: new Date(invoice.expiresAt * 1e3)
-        };
-      },
-      createWithScid: (scid, amountSats) => {
-        const expirySecs = 15 * 60;
-        const description = "mdk invoice";
-        const invoice = amountSats === null ? this.node.getVariableAmountJitInvoiceWithScid(scid, description, expirySecs) : this.node.getInvoiceWithScid(scid, amountSats * 1e3, description, expirySecs);
-        return {
-          invoice: invoice.bolt11,
-          paymentHash: invoice.paymentHash,
-          scid: invoice.scid,
-          expiresAt: new Date(invoice.expiresAt * 1e3)
-        };
-      }
-    };
-  }
-};
 
 // api-src/sdk/mdk-client.js
 ensureUndiciDispatcher2();
-var MoneyDevKitClient2 = class {
-  client;
-  constructor(options) {
-    const link = new RPCLink({
-      url: options.baseUrl,
-      headers: () => ({
-        "x-api-key": options.accessToken
-      })
-    });
-    this.client = createORPCClient(link);
-  }
-  get checkouts() {
-    return {
-      get: async (params) => {
-        return await this.client.checkout.get(params);
-      },
-      create: async (fields, nodeId) => {
-        return await this.client.checkout.create({
-          ...fields,
-          nodeId
-        });
-      },
-      confirm: async (params) => {
-        return await this.client.checkout.confirm(params);
-      },
-      registerInvoice: async (params) => {
-        return await this.client.checkout.registerInvoice(params);
-      },
-      paymentReceived: async (params) => {
-        return await this.client.checkout.paymentReceived(params);
-      }
-    };
-  }
-};
-
-// api-src/sdk/mdk.js
-function readEnv2() {
-  const nodeOptions = {};
-  if (process.env.MDK_NETWORK) {
-    nodeOptions.network = process.env.MDK_NETWORK;
-  }
-  if (process.env.MDK_VSS_URL) {
-    nodeOptions.vssUrl = process.env.MDK_VSS_URL;
-  }
-  if (process.env.MDK_ESPLORA_URL) {
-    nodeOptions.esploraUrl = process.env.MDK_ESPLORA_URL;
-  }
-  if (process.env.MDK_RGS_URL) {
-    nodeOptions.rgsUrl = process.env.MDK_RGS_URL;
-  }
-  if (process.env.MDK_LSP_NODE_ID) {
-    nodeOptions.lspNodeId = process.env.MDK_LSP_NODE_ID;
-  }
-  if (process.env.MDK_LSP_ADDRESS) {
-    nodeOptions.lspAddress = process.env.MDK_LSP_ADDRESS;
-  }
-  return {
-    accessToken: process.env.MDK_ACCESS_TOKEN,
-    mnemonic: process.env.MDK_MNEMONIC,
-    baseUrl: process.env.MDK_API_BASE_URL,
-    nodeOptions: Object.keys(nodeOptions).length > 0 ? nodeOptions : void 0
-  };
-}
-function resolveMoneyDevKitOptions2() {
-  const env = readEnv2();
-  const { accessToken, mnemonic, baseUrl, nodeOptions } = env;
-  if (!accessToken || !mnemonic) {
-    throw new Error("MoneyDevKit requires MDK_ACCESS_TOKEN and MDK_MNEMONIC environment variables to be configured.");
-  }
-  const overrides = nodeOptions ?? {};
-  const networkOverride = overrides.network ?? MAINNET_MDK_NODE_OPTIONS2.network;
-  const defaultNodeOptions = networkOverride === "signet" ? SIGNET_MDK_NODE_OPTIONS2 : MAINNET_MDK_NODE_OPTIONS2;
-  const mergedNodeOptions = {
-    ...defaultNodeOptions,
-    ...overrides
-  };
-  const network = mergedNodeOptions.network ?? defaultNodeOptions.network;
-  mergedNodeOptions.network = network;
-  const resolvedBaseUrl = baseUrl ?? (network === "signet" ? SIGNET_MDK_BASE_URL2 : MAINNET_MDK_BASE_URL2);
-  return {
-    accessToken,
-    mnemonic,
-    baseUrl: resolvedBaseUrl,
-    nodeOptions: mergedNodeOptions
-  };
-}
-function createMoneyDevKitClient2() {
-  const resolved = resolveMoneyDevKitOptions2();
-  return new MoneyDevKitClient2({
-    accessToken: resolved.accessToken,
-    baseUrl: resolved.baseUrl ?? MAINNET_MDK_BASE_URL2
-  });
-}
-function createMoneyDevKitNode2() {
-  const resolved = resolveMoneyDevKitOptions2();
-  return new MoneyDevKitNode2({
-    accessToken: resolved.accessToken,
-    mnemonic: resolved.mnemonic,
-    nodeOptions: resolved.nodeOptions
-  });
-}
 
 // api-src/payment-status.js
 async function handler(req, res) {
@@ -24396,37 +24169,6 @@ async function handler(req, res) {
   try {
     const { id } = req.query;
     console.log(`Checking payment status for ID: ${id}`);
-    console.log("Syncing node...");
-    try {
-      const node = createMoneyDevKitNode2();
-      const events = await node.receivePayments();
-      console.log("Node sync complete. Events:", JSON.stringify(events, null, 2));
-      const eventList = Array.isArray(events) ? events : [events];
-      for (const event of eventList) {
-        if (!event) continue;
-        const paymentHash = event.payment_hash || event.paymentHash;
-        const amountMsat = event.amount_msat || event.amountMsat || event.amount;
-        if (paymentHash && amountMsat) {
-          console.log(`Found payment: ${paymentHash}, ${amountMsat} msats`);
-          try {
-            const client = createMoneyDevKitClient2();
-            const result = await client.checkouts.paymentReceived({
-              payments: [{
-                paymentHash,
-                amountSats: Math.floor(parseInt(amountMsat) / 1e3)
-              }]
-            });
-            console.log("Marked payment as received in API. Result:", JSON.stringify(result));
-          } catch (apiError) {
-            console.error("Failed to call paymentReceived API:", apiError);
-          }
-        } else {
-          console.log("Skipping event (missing hash or amount):", JSON.stringify(event));
-        }
-      }
-    } catch (syncError) {
-      console.error("Node sync/processing failed:", syncError);
-    }
     const checkout = await getCheckout2(id);
     console.log(`Status for ${id}:`, checkout ? checkout.status : "Not found");
     if (checkout && (checkout.status === "PAID" || checkout.status === "PAYMENT_RECEIVED")) {

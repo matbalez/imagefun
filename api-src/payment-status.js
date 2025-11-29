@@ -26,44 +26,9 @@ export default async function handler(req, res) {
 
         console.log(`Checking payment status for ID: ${id}`);
 
-        // Sync the node to receive payments
-        console.log('Syncing node...');
-        try {
-            const node = createMoneyDevKitNode();
-            const events = await node.receivePayments();
-            console.log('Node sync complete. Events:', JSON.stringify(events, null, 2));
-
-            const eventList = Array.isArray(events) ? events : [events];
-
-            for (const event of eventList) {
-                if (!event) continue;
-
-                // Handle both property names seen in logs/SDK
-                const paymentHash = event.payment_hash || event.paymentHash;
-                const amountMsat = event.amount_msat || event.amountMsat || event.amount;
-
-                if (paymentHash && amountMsat) {
-                    console.log(`Found payment: ${paymentHash}, ${amountMsat} msats`);
-                    try {
-                        const client = createMoneyDevKitClient();
-                        const result = await client.checkouts.paymentReceived({
-                            payments: [{
-                                paymentHash: paymentHash,
-                                amountSats: Math.floor(parseInt(amountMsat) / 1000)
-                            }]
-                        });
-                        console.log('Marked payment as received in API. Result:', JSON.stringify(result));
-                    } catch (apiError) {
-                        console.error('Failed to call paymentReceived API:', apiError);
-                    }
-                } else {
-                    console.log('Skipping event (missing hash or amount):', JSON.stringify(event));
-                }
-            }
-
-        } catch (syncError) {
-            console.error('Node sync/processing failed:', syncError);
-        }
+        // Note: Node sync is now handled by the webhook handler (api/webhook.js)
+        // This endpoint just checks the status from the MDK API, which is updated by the webhook.
+        // This makes the client-side polling much faster.
 
         const checkout = await getCheckout(id);
         console.log(`Status for ${id}:`, checkout ? checkout.status : 'Not found');
