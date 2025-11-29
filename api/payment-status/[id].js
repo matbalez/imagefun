@@ -23944,10 +23944,9 @@ async function handler(req, res) {
   }
   try {
     const { id } = req.query;
-    if (!id) {
-      return res.status(400).json({ error: "Checkout ID is required" });
-    }
+    console.log(`Checking payment status for ID: ${id}`);
     const checkout = await getCheckout2(id);
+    console.log(`Status for ${id}:`, checkout ? checkout.status : "Not found");
     if (checkout && checkout.status === "PAID") {
       res.status(200).json({ paid: true, checkout });
     } else {
