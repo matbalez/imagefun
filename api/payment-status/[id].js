@@ -24400,22 +24400,49 @@ async function handler(req, res) {
     try {
       const node = createMoneyDevKitNode2();
       const events = await node.receivePayments();
-      console.log("Node sync complete. Events:", JSON.stringify(events, null, 2));
-      if (Array.isArray(events)) {
-        for (const event of events) {
-          const paymentHash = event.payment_hash || event.paymentHash;
-          const amountMsat = event.amount_msat || event.amountMsat;
-          if (paymentHash && amountMsat) {
-            console.log(`Found payment: ${paymentHash}, ${amountMsat} msats`);
+      console.log("Node sync complete. Events type:", typeof events);
+      console.log("Events raw:", JSON.stringify(events, null, 2));
+      const eventList = Array.isArray(events) ? events : [events];
+      for (const event of eventList) {
+        if (!event) continue;
+        let paymentHash, amountMsat;
+        if (typeof event === "object") {
+          paymentHash = event.payment_hash || event.paymentHash;
+          amountMsat = event.amount_msat || event.amountMsat;
+        }
+        if (!paymentHash && typeof event === "string") {
+          console.log("Parsing string event:", event);
+          const hashMatch = event.match(/payment_hash:\s*([a-f0-9]+)/);
+          const amountMatch = event.match(/amount_msat:\s*(\d+)/);
+          if (hashMatch) paymentHash = hashMatch[1];
+          if (amountMatch) amountMsat = amountMatch[1];
+        }
+        if (!paymentHash && typeof event === "object" && event.toString) {
+          const str = event.toString();
+          if (str.includes("PaymentReceived")) {
+            console.log("Parsing object.toString():", str);
+            const hashMatch = str.match(/payment_hash:\s*([a-f0-9]+)/);
+            const amountMatch = str.match(/amount_msat:\s*(\d+)/);
+            if (hashMatch) paymentHash = hashMatch[1];
+            if (amountMatch) amountMsat = amountMatch[1];
+          }
+        }
+        if (paymentHash && amountMsat) {
+          console.log(`Found payment: ${paymentHash}, ${amountMsat} msats`);
+          try {
             const client = createMoneyDevKitClient2();
-            await client.checkouts.paymentReceived({
+            const result = await client.checkouts.paymentReceived({
               payments: [{
                 paymentHash,
                 amountSats: Math.floor(parseInt(amountMsat) / 1e3)
               }]
             });
-            console.log("Marked payment as received in API");
+            console.log("Marked payment as received in API. Result:", JSON.stringify(result));
+          } catch (apiError) {
+            console.error("Failed to call paymentReceived API:", apiError);
           }
+        } else {
+          console.log("Could not extract payment details from event:", event);
         }
       }
     } catch (syncError) {
