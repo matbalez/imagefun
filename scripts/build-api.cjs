@@ -10,8 +10,9 @@ functions.forEach(file => {
         bundle: true,
         platform: 'node',
         target: 'node18',
-        outfile: `api/${file}`,
-        format: 'esm', // Vercel supports ESM with type: module
+        outfile: `api/${file.replace('.js', '.cjs')}`,
+        format: 'cjs',
+        footer: { js: 'if (module.exports.default) module.exports = module.exports.default;' },
         external: ['@google/generative-ai'], // Keep this external if it works, or bundle it too to be safe. 
         // We MUST bundle @moneydevkit/nextjs because it's broken in Node ESM
     }).catch(() => process.exit(1));
