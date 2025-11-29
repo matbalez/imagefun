@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "server": "node dist/server.cjs",
-    "build": "vite build",
+    "build:api": "node scripts/build-api.cjs",
+    "build": "npm run build:api && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
