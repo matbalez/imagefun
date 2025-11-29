@@ -1,31 +1,43 @@
-# React + Vite
+# Nanobanana Image Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A generative AI image creation tool powered by Google Gemini and monetized via Bitcoin Lightning payments using MoneyDevKit.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **AI Image Generation**: Create high-quality, artistic images based on a word and a feeling.
+- **Lightning Payments**: Micro-transactions via Bitcoin Lightning Network to unlock generation.
+- **Serverless Architecture**: Built with Next.js/Express logic adapted for Vercel Serverless Functions.
+- **Secure**: API keys are kept server-side and never exposed to the client.
 
-## React Compiler
+## Deployment
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+This app is designed to be deployed on **Vercel**.
 
-## Expanding the ESLint configuration
+### Environment Variables
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+You must configure the following environment variables in your Vercel Project Settings:
 
-## Deployment & Secrets
+- `GEMINI_API_KEY`: Your Google Gemini API key (get one from AI Studio).
+- `MDK_ACCESS_TOKEN`: MoneyDevKit Access Token.
+- `MDK_MNEMONIC`: MoneyDevKit Mnemonic (12 words).
+- `MDK_WEBHOOK_SECRET`: MoneyDevKit Webhook Secret.
+- `MDK_NETWORK`: `mainnet` (or `signet` for testing).
 
-To deploy this app to Vercel:
+**Important**: Do not prefix `GEMINI_API_KEY` with `VITE_`. It must remain a server-side secret.
 
-1.  **Environment Variables**:
-    Go to your Vercel Project Settings > Environment Variables and add the following (ensure they are checked for Production):
-    - `VITE_GEMINI_API_KEY`: Your Gemini API key.
-    - `MDK_ACCESS_TOKEN`: MoneyDevKit Access Token.
-    - `MDK_MNEMONIC`: MoneyDevKit Mnemonic.
-    - `MDK_WEBHOOK_SECRET`: MoneyDevKit Webhook Secret.
+### Local Development
 
-2.  **Redeploy**:
-    If you added variables after the initial deploy, you must **Redeploy** for them to take effect.
-    You can do this from the Vercel dashboard (Deployments > ... > Redeploy) or by pushing a new commit to your repository.
+1.  Install dependencies:
+    ```bash
+    npm install
+    ```
+
+2.  Run the development server:
+    ```bash
+    npm run dev
+    ```
+
+3.  Run the local API server (for testing backend logic):
+    ```bash
+    npm run server
+    ```
